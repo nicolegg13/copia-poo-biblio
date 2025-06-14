@@ -1,0 +1,42 @@
+# =================================================================
+# Estágio 1: Build da Aplicação (usando Maven)
+# Usamos uma imagem que já vem com Maven e JDK para compilar o projeto.
+# =================================================================
+FROM maven:3.8.5-openjdk-17 AS builder
+
+# Instala o Git, necessário para clonar o repositório.
+RUN apt-get update && apt-get install -y git
+
+# Define o diretório de trabalho onde os comandos serão executados.
+WORKDIR /app
+
+# Clona seu projeto do GitHub para o diretório /app.
+# O ponto "." no final significa clonar para o diretório atual.
+RUN git clone https://github.com/nicolegg13/copia-poo-biblio.git .
+
+# Executa o comando do Maven para compilar o projeto.
+# Isso vai baixar as dependências e gerar o arquivo .war em /app/target/
+RUN mvn clean install
+
+# =================================================================
+# Estágio 2: Imagem Final de Execução (usando Tomcat)
+# Esta é a imagem final, otimizada, que irá rodar a aplicação.
+# =================================================================
+FROM tomcat:9.0-jdk17-temurin
+
+# Remove o conteúdo padrão da pasta de aplicações do Tomcat para evitar conflitos.
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copia o arquivo .war (gerado no estágio 'builder') para a pasta webapps do Tomcat.
+# O Tomcat irá automaticamente "descompactar" e rodar a sua aplicação.
+# Renomeamos para 'ROOT.war' para que a aplicação responda na raiz do servidor.
+COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
+
+# Expõe a porta 8080, que é a porta padrão do Tomcat.
+# Isso informa ao Docker que o contêiner escuta nesta porta.
+EXPOSE 8080
+
+# Comando para iniciar o servidor Tomcat.
+# "catalina.sh run" inicia o servidor em primeiro plano (foreground), o que é
+# a prática recomendada para contêineres, permitindo que o Docker capture os logs.
+ENTRYPOINT ["catalina.sh", "run"]

@@ -1,57 +1,36 @@
-# Define a versão do Docker Compose a ser usada.
-version: '3.8'
-
-# Define os serviços (contêineres) que compõem a nossa aplicação.
 services:
-  # Serviço do Banco de Dados PostgreSQL
   db:
-    image: postgres:14-alpine # Usa uma imagem oficial e leve do Postgres.
+    image: postgres:14-alpine
     container_name: postgres_db
     environment:
-      # Essas variáveis são usadas pela imagem do Postgres para criar o banco e o usuário.
-      # Devem ser exatamente iguais aos valores esperados pelo seu código Java.
       POSTGRES_DB: poow_trabalho
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
     volumes:
-      # Este volume mapeia seu script SQL para uma pasta especial dentro do contêiner.
-      # O Postgres executará automaticamente qualquer .sql nesta pasta na primeira vez que for iniciado.
       - ./poow_trabalho.sql:/docker-entrypoint-initdb.d/init.sql
-      # Este é um 'named volume' para persistir os dados do banco de dados.
-      # Se você derrubar o contêiner, os dados não serão perdidos.
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
 
-  # Serviço da Aplicação Java
   app:
-    # 'build: .' instrui o Compose a construir a imagem usando o Dockerfile no diretório atual.
-    build: .
+    build:
+      context: .
+      target: runtime
     container_name: java_app
     ports:
-      # Mapeia a porta 8080 do seu PC (Host) para a porta 8080 do contêiner.
-      # Isso permite que você acesse a aplicação no navegador via http://localhost:8080.
       - "8080:8080"
     volumes:
-      # Mapeia a pasta 'logs' local para a pasta de logs do Tomcat dentro do contêiner.
-      # Cumpre o requisito de expor os logs em um volume no SO Host.
       - ./logs:/usr/local/tomcat/logs
     environment:
-      # Aqui definimos a variável de ambiente que nosso código Java modificado irá usar.
-      # 'db' é o nome do serviço do banco de dados definido acima. Docker Compose
-      # faz com que o nome do serviço seja resolvido para o IP correto do contêiner do DB.
       DB_HOST: db
     depends_on:
-      # Garante que o contêiner 'db' será iniciado ANTES do contêiner 'app'.
       - db
     networks:
       - app-network
 
-# Define a rede que os contêineres usarão para se comunicar.
 networks:
   app-network:
     driver: bridge
 
-# Define os volumes nomeados para persistência de dados.
 volumes:
   postgres_data:

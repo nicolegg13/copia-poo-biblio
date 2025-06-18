@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%--URI da taglib atualizada para o Tomcat 10 em todos os arquivos .jsp --%>
 <html>
 <head>
     <title>Login - Sistema Biblioteca</title>

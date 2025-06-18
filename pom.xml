@@ -16,11 +16,6 @@
     </properties>
 
     <dependencies>
-        <!-- =================================================================== -->
-        <!-- APIs FORNECIDAS PELO SERVIDOR (Tomcat) -->
-        <!-- Escopo 'provided' significa que são necessárias para compilar, -->
-        <!-- mas NÃO devem ser incluídas no .war final. -->
-        <!-- =================================================================== -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -34,19 +29,15 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- =================================================================== -->
-        <!-- DEPENDÊNCIAS DA SUA APLICAÇÃO -->
-        <!-- Escopo padrão 'compile' garante que serão incluídas no .war -->
-        <!-- =================================================================== -->
-
-        <!-- Driver do Banco de Dados PostgreSQL -->
+        <!-- driver do banco de dados -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.3</version>
         </dependency>
 
-        <!-- A ÚNICA dependência que você precisa para JSTL (Tags <c:if>, etc) -->
+        <!-- erro: NoClassDefFoundError-->
+        <!-- dependências para JSTL (<c:if>, etc) - força o Maven a empacotar todos os arquivos JAR dentro do .war -->
         <dependency>
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>

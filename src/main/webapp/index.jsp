@@ -1,11 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<%--
-  Este arquivo apenas verifica se o usuário está logado.
-  Se não estiver, redireciona para a página de login.
-  Se estiver, redireciona para a home.
---%>
+<%-- verifica se o usuário está logado:
+  se não estiver, redireciona para a página de login
+  se estiver, redireciona para a home --%>
 <c:choose>
     <c:when test="${empty sessionScope.usuarioLogado}">
         <c:redirect url="/login.jsp" />

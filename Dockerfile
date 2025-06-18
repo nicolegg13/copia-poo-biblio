@@ -1,28 +1,31 @@
-# Estágio 1: Build da Aplicação a partir do GitHub
+# Estágio 1: Build da Aplicação
+# Usamos a imagem oficial do Maven com o JDK 17 para compilar o projeto.
 FROM maven:3.9-eclipse-temurin-17 AS build
 
-# Instala o Git
-RUN apt-get update && apt-get install -y git
-
-# Clona o projeto do GitHub
+# Define o diretório de trabalho dentro do container.
 WORKDIR /app
-RUN git clone https://github.com/nicolegg13/copia-poo-biblio.git .
 
-# Executa o build do Maven para garantir que todas as dependências sejam baixadas e o projeto compilado
+# Copia o pom.xml primeiro. Se ele não mudar, o Docker reutiliza o cache do download das dependências.
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copia o resto do código-fonte. Se qualquer arquivo em 'src' mudar, esta camada e as seguintes serão reconstruídas.
+COPY src ./src
 RUN mvn clean package
 
 # Estágio 2: Ambiente de Execução
+# Usamos a imagem oficial do Tomcat.
 FROM tomcat:10.1-jdk17-temurin
 
-# Remove o conteúdo padrão da pasta webapps do Tomcat. 
+# Remove o conteúdo padrão da pasta webapps do Tomcat.
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copia o arquivo .war gerado no estágio anterior para a pasta webapps do Tomcat.
-# Renomeia para ROOT.war para a aplicação rodar na raiz do servidor. 
+# Copia o arquivo .war construído no estágio anterior para a pasta webapps do Tomcat.
+# Renomeia para ROOT.war para a aplicação rodar na raiz do servidor.
 COPY --from=build /app/target/biblioteca.war /usr/local/tomcat/webapps/ROOT.war
 
-# Expõe a porta 8080 para o mundo exterior.
+# Expõe a porta 8080.
 EXPOSE 8080
 
-# Comando para iniciar o servidor Tomcat. 
+# Comando para iniciar o servidor Tomcat.
 CMD ["catalina.sh", "run"]
